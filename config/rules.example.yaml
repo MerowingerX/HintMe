@@ -1,0 +1,47 @@
+user:
+  name: "Anna"
+  language: "de"
+
+rules:
+  addressee_check:
+    enabled: true
+    hint: "Diese Nachricht scheint nicht direkt an dich gerichtet zu sein."
+    confidence_threshold: 0.7
+
+  reply_needed:
+    enabled: true
+    hint: "Hier wird wahrscheinlich keine Antwort erwartet."
+
+  humor_irony:
+    enabled: true
+    hint: "Das ist wahrscheinlich nicht ernst gemeint: {explanation}"
+
+  sarcasm:
+    enabled: true
+    sensitivity: high  # low / medium / high
+    hint: "Achtung – das könnte sarkastisch sein: {explanation}"
+
+  outgoing_guard:
+    enabled: true
+    checks:
+      - too_direct
+      - inappropriate
+      - oversharing
+    hint: "Überlege nochmal, ob du das so schicken möchtest: {explanation}"
+
+custom_rules:
+  - name: "Gruppenkontext"
+    enabled: true
+    condition: "Nachricht in Gruppe ohne direkten @-Mention"
+    hint: "In dieser Gruppe wurde niemand direkt angesprochen."
+
+  - name: "Rhetorische Fragen"
+    enabled: true
+    condition: "Frage ohne echte Antworterwartung"
+    hint: "Das ist wahrscheinlich eine rhetorische Frage."
+
+hints:
+  style: "freundlich"     # freundlich / neutral / direkt
+  max_length: 300
+  show_confidence: false
+  language: "de"
