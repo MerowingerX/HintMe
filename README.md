@@ -1,66 +1,60 @@
-# 🧭 WhatsApp Social Compass
+# WhatsApp Social Compass
 
-> An open-source AI filter for WhatsApp that helps autistic users navigate social communication.
+> Ein KI-gestützter Filter für WhatsApp, der autistischen Nutzerinnen hilft, soziale Kommunikation einzuordnen.
 
-## What it does
+Jede eingehende WhatsApp-Nachricht wird automatisch analysiert. Der Nutzer bekommt einen kurzen Hinweis in einem eigenen Chat:
 
-Every incoming WhatsApp message is automatically analyzed and the user receives a small hint in a dedicated chat:
+- 🔵 **Nicht an dich gerichtet** – die Nachricht galt jemand anderem
+- 🟡 **Keine Antwort nötig** – es wird keine Reaktion erwartet
+- 😄 **Humor / Ironie erkannt** – wahrscheinlich nicht wörtlich gemeint
+- ⚠️ **Sarkasmus erkannt** – Vorsicht, möglicherweise nicht ernst gemeint
 
-- 🔵 **Not addressed to you** – message was directed at someone else
-- 🟡 **No reply needed** – no response is expected
-- 😄 **Humor / Irony detected** – this is probably not meant literally
-- ⚠️ **Sarcasm detected** – be careful, this might not be sincere
+Alle Regeln sind in `config/rules.yaml` konfigurierbar – ohne Programmierkenntnisse.
 
-All rules are fully configurable in `config/rules.yaml` – no coding required.
+---
 
-## Architecture
+## Architektur
 
 ```
-Incoming WhatsApp Message
-        ↓
+Eingehende WhatsApp-Nachricht
+            ↓
 Meta Cloud API Webhook (FastAPI)
-        ↓
-Claude Haiku (AI Analysis)
-        ↓
-Hint → sent back to user via Business API
+            ↓
+      KI-Analyse (Claude / Llama)
+            ↓
+  Hint → per Business API an Nutzer
 ```
 
-## Quick Start
+---
 
-### 1. Clone & configure
+## Dokumentation
+
+| Dokument | Inhalt |
+|---|---|
+| [ONBOARDING.md](ONBOARDING.md) | Vollständige Einrichtung Schritt für Schritt |
+| [PHONE_NUMBER.md](PHONE_NUMBER.md) | Welche Telefonnummer du brauchst (und welche nicht) |
+| [ALTERNATIVE_MODEL.md](ALTERNATIVE_MODEL.md) | Llama / Groq statt Claude verwenden |
+
+---
+
+## Schnellstart
 
 ```bash
 git clone https://github.com/MerowingerX/whatsapp-social-compass
 cd whatsapp-social-compass
 cp .env.example .env
 cp config/rules.example.yaml config/rules.yaml
-# Edit .env and config/rules.yaml
-```
-
-### 2. Start
-
-```bash
+# .env und config/rules.yaml anpassen
 docker compose up -d
 ```
 
-### 3. Expose webhook (dev)
+Die vollständige Anleitung inkl. Meta-Setup und Webhook-Registrierung: [ONBOARDING.md](ONBOARDING.md)
 
-```bash
-ngrok http 8000
-# Set the HTTPS URL as webhook in Meta Developer Console
-# Webhook path: /webhook
-```
+---
 
-### 4. Meta Setup
+## Konfiguration
 
-1. Create a [Meta Developer App](https://developers.facebook.com/apps)
-2. Add WhatsApp product
-3. Configure webhook URL + verify token (from your `.env`)
-4. Subscribe to `messages` events
-
-## Configuration
-
-Edit `config/rules.yaml` to customize behavior per user:
+`config/rules.yaml` steuert, was analysiert wird und wie die Hinweise formuliert sind:
 
 ```yaml
 user:
@@ -70,17 +64,28 @@ rules:
   humor_irony:
     enabled: true
     hint: "Das ist wahrscheinlich nicht ernst gemeint: {explanation}"
+
+  sarcasm:
+    enabled: true
+    sensitivity: high   # low / medium / high
+    hint: "Achtung – das könnte sarkastisch sein: {explanation}"
 ```
 
-## Cost Estimate
+---
 
-| Component | Cost/month |
+## Kosten
+
+| Komponente | Kosten/Monat |
 |---|---|
-| Meta WhatsApp Cloud API | $0 (service messages free) |
-| Claude Haiku 4.5 (~100 msgs/day) | ~$1 |
-| VPS (e.g. Hetzner CX11) | ~€4 |
-| **Total** | **~€5** |
+| Meta WhatsApp Cloud API | $0 (Service-Nachrichten kostenlos) |
+| Claude Haiku (~100 Nachrichten/Tag) | ~$1 |
+| VPS (z.B. Hetzner CX11) | ~€4 |
+| **Gesamt** | **~€5** |
 
-## License
+Mit Llama über Groq entfallen die KI-Kosten vollständig. Siehe [ALTERNATIVE_MODEL.md](ALTERNATIVE_MODEL.md).
+
+---
+
+## Lizenz
 
 MIT

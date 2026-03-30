@@ -6,7 +6,6 @@ rules:
   addressee_check:
     enabled: true
     hint: "Diese Nachricht scheint nicht direkt an dich gerichtet zu sein."
-    confidence_threshold: 0.7
 
   reply_needed:
     enabled: true
@@ -20,14 +19,6 @@ rules:
     enabled: true
     sensitivity: high  # low / medium / high
     hint: "Achtung – das könnte sarkastisch sein: {explanation}"
-
-  outgoing_guard:
-    enabled: true
-    checks:
-      - too_direct
-      - inappropriate
-      - oversharing
-    hint: "Überlege nochmal, ob du das so schicken möchtest: {explanation}"
 
 custom_rules:
   - name: "Gruppenkontext"
@@ -43,5 +34,4 @@ custom_rules:
 hints:
   style: "freundlich"     # freundlich / neutral / direkt
   max_length: 300
-  show_confidence: false
   language: "de"

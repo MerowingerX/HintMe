@@ -2,12 +2,16 @@ import os
 import json
 import hmac
 import hashlib
+import logging
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import PlainTextResponse
 from dotenv import load_dotenv
+import httpx
 from analyzer import analyze_message
 from sender import send_hint
 from context import ContextStore
+
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -45,17 +49,19 @@ async def receive_message(request: Request):
     try:
         entry = data["entry"][0]["changes"][0]["value"]
         messages = entry.get("messages", [])
-        metadata = entry.get("metadata", {})
 
         for msg in messages:
             if msg["type"] != "text":
                 continue
 
-            sender     = msg["from"]
-            text       = msg["text"]["body"]
-            msg_id     = msg["id"]
-            chat_name  = entry.get("contacts", [{}])[0].get("profile", {}).get("name", sender)
-            is_group   = sender != USER_PHONE
+            sender    = msg["from"]
+            text      = msg["text"]["body"]
+            msg_id    = msg["id"]
+            contacts  = entry.get("contacts", [])
+            chat_name = contacts[0].get("profile", {}).get("name", sender) if contacts else sender
+            # Group messages: sender is not listed in the contacts array (which only contains direct-chat partners)
+            direct_senders = {c.get("wa_id") for c in contacts}
+            is_group  = sender not in direct_senders
 
             ctx = context.get(sender)
             context.add(sender, {"role": "contact", "text": text})
@@ -68,7 +74,10 @@ async def receive_message(request: Request):
             )
 
             if hint:
-                await send_hint(hint, reference_id=msg_id)
+                try:
+                    await send_hint(hint, reference_id=msg_id)
+                except (httpx.HTTPStatusError, httpx.RequestError) as e:
+                    logger.error("Failed to send hint: %s", e)
 
     except (KeyError, IndexError):
         pass  # Kein gültiger Nachrichtenblock

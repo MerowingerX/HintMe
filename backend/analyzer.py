@@ -16,7 +16,8 @@ def build_prompt(text: str, sender: str, is_group: bool, history: list) -> str:
     if rules.is_enabled("humor_irony"):
         active.append("humor_irony: Enthält sie Humor oder Ironie?")
     if rules.is_enabled("sarcasm"):
-        active.append("sarcasm: Enthält sie Sarkasmus?")
+        sensitivity = rules.config.get("rules", {}).get("sarcasm", {}).get("sensitivity", "medium")
+        active.append(f"sarcasm: Enthält sie Sarkasmus? (Sensitivität: {sensitivity})")
 
     custom = rules.get_custom_rules()
     for rule in custom:
